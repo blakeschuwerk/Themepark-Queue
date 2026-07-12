@@ -1,0 +1,726 @@
+/* Scratch-like dark-theme editor styles. Category colors come from
+ * BLOCKS_SPEC.md §4.3 and are set per-element as the --qb-cat-color CSS
+ * custom property (inherited by nested wrappers like body indents). Palette
+ * matches the rest of the app (see src/index.css / src/App.css). */
+
+.qb-editor {
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  background: #15191d;
+  color: #f4f1e8;
+  font-family: inherit;
+  font-size: 13px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* -- palette -------------------------------------------------------------- */
+
+.qb-palette {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #191d20;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.qb-palette-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.qb-palette-heading {
+  margin: 0 0 6px;
+  padding-left: 6px;
+  border-left: 4px solid var(--qb-cat-color);
+  color: var(--qb-cat-color);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.qb-palette-list {
+  display: grid;
+  gap: 6px;
+}
+
+.qb-palette-block {
+  all: unset;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--qb-cat-color);
+  color: #10130f;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.3;
+  cursor: grab;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25) inset;
+}
+
+.qb-palette-block:hover {
+  filter: brightness(1.08);
+}
+
+.qb-palette-block:active {
+  cursor: grabbing;
+}
+
+.qb-palette-block:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.qb-palette-block.qb-shape-reporter {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
+.qb-palette-block.qb-shape-hat {
+  border-radius: 12px 12px 5px 5px;
+}
+
+.qb-palette-slot {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 5px;
+  padding: 0 6px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.qb-palette-hint {
+  margin: 0;
+  padding: 8px 12px;
+  color: #6f777d;
+  font-size: 10.5px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.qb-palette.qb-palette-trash-active {
+  outline: 2px dashed #ff6b81;
+  outline-offset: -4px;
+  background: #2a1418;
+}
+
+/* -- main / toolbar --------------------------------------------------------- */
+
+.qb-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.qb-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: #1a1f23;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.qb-toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.qb-toolbar-label {
+  margin-right: 2px;
+  color: #97a0a6;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.qb-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: rgba(123, 216, 143, 0.18);
+  border: 1px solid rgba(123, 216, 143, 0.4);
+  color: #eaf8ed;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.qb-btn:hover {
+  background: rgba(123, 216, 143, 0.28);
+}
+
+.qb-btn.ghost {
+  background: #20262a;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #d8dee2;
+}
+
+.qb-btn.danger {
+  background: rgba(255, 77, 109, 0.12);
+  border-color: rgba(255, 77, 109, 0.35);
+  color: #ffbeca;
+}
+
+.qb-btn:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.qb-btn:disabled:hover {
+  background: #20262a;
+}
+
+.qb-text-input {
+  box-sizing: border-box;
+  background: #15191d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 7px;
+  color: #f4f1e8;
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 8px;
+  min-width: 130px;
+  height: 30px;
+}
+
+.qb-library-chip {
+  display: inline-flex;
+  align-items: stretch;
+  background: #20262a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.qb-chip-load {
+  all: unset;
+  cursor: pointer;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: #d8dee2;
+}
+
+.qb-chip-load:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.qb-chip-delete {
+  all: unset;
+  cursor: pointer;
+  padding: 5px 9px;
+  color: #ffbeca;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.qb-chip-delete:hover {
+  background: rgba(255, 77, 109, 0.18);
+}
+
+/* -- scripts area ------------------------------------------------------------ */
+
+.qb-scripts {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 24px;
+}
+
+.qb-scripts-empty {
+  color: #97a0a6;
+  font-size: 13px;
+  padding: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  text-align: center;
+  max-width: 380px;
+}
+
+.qb-script {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.qb-hat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--qb-cat-color);
+  color: #10130f;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 8px 8px 8px 14px;
+  border-radius: 14px 14px 6px 6px;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.qb-hat-delete {
+  all: unset;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: 900;
+  font-size: 15px;
+  padding: 0 6px;
+  border-radius: 6px;
+}
+
+.qb-hat-delete:hover {
+  color: #5c0018;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+/* -- containers (statement lists) -------------------------------------------- */
+
+.qb-container {
+  display: grid;
+  gap: 2px;
+  min-height: 10px;
+  padding: 3px 2px;
+}
+
+.qb-container-row {
+  display: contents;
+}
+
+.qb-container-empty {
+  all: unset;
+  cursor: pointer;
+  box-sizing: border-box;
+  color: #8a9298;
+  font-size: 11px;
+  font-style: italic;
+  padding: 7px 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  margin: 2px 0;
+}
+
+.qb-container-empty:hover {
+  border-color: rgba(123, 216, 143, 0.5);
+  color: #cfe9d6;
+}
+
+.qb-container-append {
+  all: unset;
+  cursor: pointer;
+  color: #7bd88f;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  opacity: 0;
+}
+
+.qb-container:hover .qb-container-append {
+  opacity: 0.65;
+}
+
+.qb-container-append:hover {
+  opacity: 1 !important;
+}
+
+.qb-container-focused {
+  outline: 2px solid #7bd88f;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.qb-drop-line {
+  height: 3px;
+  background: #ffd166;
+  border-radius: 2px;
+  margin: 1px 4px;
+  box-shadow: 0 0 6px #ffd166;
+}
+
+/* -- statement blocks --------------------------------------------------------- */
+
+.qb-block {
+  background: #22272b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 5px solid var(--qb-cat-color);
+  border-radius: 9px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.qb-block-unknown {
+  padding: 8px 12px;
+  color: #ffbeca;
+  font-size: 12px;
+  border: 1px dashed #ff6b81;
+  border-radius: 8px;
+}
+
+.qb-block-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 6px 6px 10px;
+  cursor: grab;
+  position: relative;
+}
+
+.qb-block-header:active {
+  cursor: grabbing;
+}
+
+.qb-block-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  color: #f4f1e8;
+  font-size: 12.5px;
+  font-weight: 600;
+  min-height: 24px;
+}
+
+.qb-selected {
+  outline: 2px solid #ffd166;
+  outline-offset: 1px;
+}
+
+.qb-trace-glow {
+  box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.4), 0 0 10px 2px rgba(255, 209, 102, 0.45);
+  animation: qb-glow-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes qb-glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.3), 0 0 6px 1px rgba(255, 209, 102, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.7), 0 0 16px 4px rgba(255, 209, 102, 0.7);
+  }
+}
+
+.qb-dragging {
+  opacity: 0.35;
+}
+
+.qb-block-body-wrap {
+  margin: 0 6px 6px 16px;
+  padding-left: 10px;
+  border-left: 3px solid var(--qb-cat-color);
+}
+
+.qb-block-else-label {
+  margin: 2px 0 0 16px;
+  color: #97a0a6;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.qb-block-else-wrap {
+  margin-bottom: 6px;
+}
+
+/* -- block action menu -------------------------------------------------------- */
+
+.qb-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.qb-menu-btn {
+  all: unset;
+  cursor: pointer;
+  color: #97a0a6;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 900;
+  line-height: 1.6;
+}
+
+.qb-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f4f1e8;
+}
+
+.qb-menu-popup {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 30;
+  margin-top: 4px;
+  background: #1a1f23;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  padding: 6px;
+  display: grid;
+  gap: 2px;
+  min-width: 130px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+}
+
+.qb-menu-popup button {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #f4f1e8;
+  width: 100%;
+}
+
+.qb-menu-popup button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.qb-menu-danger {
+  color: #ffbeca !important;
+}
+
+.qb-menu-help {
+  margin-top: 4px;
+  padding: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 11.5px;
+  color: #c8d0d4;
+  display: grid;
+  gap: 6px;
+  max-width: 230px;
+}
+
+.qb-menu-help code {
+  background: #0f1315;
+  padding: 5px 7px;
+  border-radius: 6px;
+  display: block;
+  color: #9be6a8;
+  font-size: 10.5px;
+  white-space: pre-wrap;
+}
+
+/* -- slots / reporters --------------------------------------------------------- */
+
+.qb-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+}
+
+.qb-slot-drop-highlight {
+  outline: 2px solid #ffd166;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.qb-literal-input {
+  box-sizing: border-box;
+  background: #15191d;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  color: #f4f1e8;
+  font: inherit;
+  font-size: 12px;
+  padding: 2px 6px;
+  height: 24px;
+}
+
+.qb-literal-number {
+  width: 48px;
+  text-align: center;
+}
+
+/* Hide the up/down spinner arrows — they read as a confusing "value selector"
+   and crowd narrow inputs. You can still type a number directly. */
+.qb-literal-number::-webkit-outer-spin-button,
+.qb-literal-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qb-literal-number {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.qb-literal-text {
+  width: 92px;
+}
+
+.qb-literal-any {
+  width: 72px;
+}
+
+.qb-literal-dropdown,
+.qb-literal-party {
+  width: auto;
+  max-width: 130px;
+}
+
+.qb-literal-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+
+.qb-cell-x,
+.qb-cell-y {
+  width: 40px;
+}
+
+.qb-cell-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8b939a;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.qb-literal-bool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #15191d;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  padding: 2px 8px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 11px;
+  color: #c8d0d4;
+}
+
+.qb-reporter-picker {
+  box-sizing: border-box;
+  background: rgba(123, 216, 143, 0.14);
+  border: 1px dashed rgba(123, 216, 143, 0.6);
+  border-radius: 6px;
+  color: #9be6a8;
+  font-size: 11px;
+  font-weight: 700;
+  height: 24px;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+/* Keep the collapsed control compact per prompt length (a native <select>
+   otherwise widens to fit its longest menu option). The full option text
+   still shows when the menu is open. */
+.qb-picker-block {
+  width: 66px;
+}
+
+.qb-picker-room,
+.qb-picker-check {
+  width: 116px;
+}
+
+.qb-reporter-picker:hover {
+  background: rgba(123, 216, 143, 0.24);
+  border-color: rgba(123, 216, 143, 0.9);
+}
+
+.qb-reporter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--qb-cat-color);
+  color: #10130f;
+  font-weight: 700;
+  font-size: 11.5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  position: relative;
+}
+
+.qb-pop-btn {
+  all: unset;
+  cursor: pointer;
+  margin-left: 2px;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: 900;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.qb-pop-btn:hover {
+  color: #5c0018;
+}
+
+/* -- hover tooltip (trace values, block docs) ---------------------------------- */
+
+[data-qb-tooltip] {
+  position: relative;
+}
+
+[data-qb-tooltip]:hover::after {
+  content: attr(data-qb-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  background: #0b0d0e;
+  color: #f4f1e8;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 60;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+/* -- drag ghost ------------------------------------------------------------------ */
+
+.qb-drag-ghost {
+  position: fixed;
+  z-index: 100;
+  transform: translate(14px, 10px);
+  background: #22272b;
+  border: 1px solid #ffd166;
+  color: #f4f1e8;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qb-drag-ghost-trash {
+  border-color: #ff6b81;
+  color: #ffbeca;
+}

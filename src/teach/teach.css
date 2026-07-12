@@ -1,0 +1,352 @@
+/* Styles for the teaching system (CoachPanel + ReferencePanel). Matches the
+ * dark theme used by the rest of the app / editor (see src/editor/editor.css,
+ * src/App.css). */
+
+.qt-coach,
+.qt-reference {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  background: #15191d;
+  color: #f4f1e8;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.qt-empty {
+  color: rgba(244, 241, 232, 0.6);
+  font-style: italic;
+}
+
+/* -- lesson picker --------------------------------------------------- */
+
+.qt-lesson-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.qt-lesson-picker label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(244, 241, 232, 0.6);
+}
+
+.qt-lesson-picker select {
+  background: #1f242a;
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+/* -- story / instructions --------------------------------------------- */
+
+.qt-story h2 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.qt-story p {
+  margin: 0;
+  line-height: 1.5;
+  color: rgba(244, 241, 232, 0.9);
+}
+
+.qt-instructions h3,
+.qt-checklist h3,
+.qt-hints-feed h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(244, 241, 232, 0.6);
+}
+
+.qt-instructions ol {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+/* -- checklist ---------------------------------------------------------- */
+
+.qt-checklist ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qt-checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.qt-check-mark {
+  flex: none;
+  font-weight: 700;
+}
+
+.qt-check-pass {
+  color: #7bd88f;
+}
+
+.qt-check-pass .qt-check-mark {
+  color: #7bd88f;
+}
+
+.qt-check-pending {
+  color: rgba(244, 241, 232, 0.75);
+}
+
+.qt-check-pending .qt-check-mark {
+  color: rgba(244, 241, 232, 0.35);
+}
+
+.qt-complete-banner {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(123, 216, 143, 0.12);
+  border: 1px solid rgba(123, 216, 143, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.qt-complete-banner p {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* -- hints feed --------------------------------------------------------- */
+
+.qt-hints-feed ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qt-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-left: 3px solid;
+  background: rgba(255, 255, 255, 0.04);
+  line-height: 1.4;
+}
+
+.qt-hint-info {
+  border-left-color: #4cc9f0;
+}
+
+.qt-hint-warn {
+  border-left-color: #f2994a;
+}
+
+.qt-hint-alert {
+  border-left-color: #ff4d6d;
+}
+
+.qt-hint-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(244, 241, 232, 0.55);
+}
+
+.qt-hint-message {
+  color: rgba(244, 241, 232, 0.92);
+}
+
+/* -- buttons ------------------------------------------------------------ */
+
+.qt-primary-button,
+.qt-secondary-button {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.qt-primary-button {
+  background: #7bd88f;
+  color: #15191d;
+  font-weight: 600;
+  border-color: transparent;
+}
+
+.qt-secondary-button {
+  background: #1f242a;
+  color: inherit;
+}
+
+.qt-secondary-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.qt-lesson-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.qt-solution-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* -- nudges / explain ----------------------------------------------------- */
+
+.qt-revealed-hints {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: rgba(244, 241, 232, 0.85);
+  line-height: 1.4;
+}
+
+.qt-explain-output {
+  margin-top: 8px;
+  padding: 10px;
+  background: #101317;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+/* -- reference panel ------------------------------------------------------ */
+
+.qt-ref-search input {
+  width: 100%;
+  box-sizing: border-box;
+  background: #1f242a;
+  color: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.qt-ref-group h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.qt-ref-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.qt-ref-block {
+  border-left: 3px solid var(--qt-cat-color, #4cc9f0);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.qt-ref-block-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.qt-ref-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--qt-cat-color, #4cc9f0);
+  flex: none;
+}
+
+.qt-ref-block-name {
+  font-weight: 600;
+}
+
+.qt-ref-blurb {
+  margin: 0 0 4px;
+  line-height: 1.4;
+  color: rgba(244, 241, 232, 0.85);
+}
+
+.qt-ref-example {
+  display: block;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 11.5px;
+  color: rgba(244, 241, 232, 0.65);
+}
+
+/* -- tooltip (BlockHelpTooltip) ------------------------------------------- */
+
+.qt-tooltip {
+  max-width: 260px;
+  background: #1f242a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #f4f1e8;
+}
+
+.qt-tooltip-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.qt-tooltip-blurb {
+  margin: 0 0 4px;
+}
+
+.qt-tooltip-example {
+  display: block;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 11px;
+  color: rgba(244, 241, 232, 0.65);
+}

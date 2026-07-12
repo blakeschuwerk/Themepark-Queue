@@ -1,0 +1,138 @@
+{
+  "task_name": "block-logic-sandbox-rebuild",
+  "created_at": "2026-07-09T00:00:00Z",
+  "last_updated": "2026-07-10T15:20:00Z",
+  "spec": "docs/BLOCKS_SPEC.md",
+  "pipeline_note": "User-overridden roles: Fable (main agent) = planner/orchestrator/design-reviewer. Sonnet coder agents build. Sonnet debugger agents fix failures. No Opus reviewer tier per user instruction.",
+  "components": [
+    {
+      "id": "C1-block-core",
+      "description": "Pure-JS block language core: catalog.js (all v1 blocks + docs), ast.js, interpreter.js (runTick with intents, reservations, rule monitor, op budget, trace), narrator.js, examplePrograms.js, engine/rules.js, plus trimming engine/pathfinding.js to helpers+BFS. Node --test suite.",
+      "why": "The whole product hinges on a correct, testable interpreter decoupled from React. Everything else consumes its contracts (spec sections 4, 9, 10).",
+      "acceptance_criteria": "npm test passes with node --test covering: catalog integrity (every block has label/category/docs/slots), ast insert/remove/move/serialize round-trip, interpreter move intents + adjacency/wall validation, reservation set semantics, collision & swap violation detection (learning + strict modes), op budget abort, trace contents, narrator output for the reservation-brain example, all 3 example programs run 20 ticks without error.",
+      "depends_on": [],
+      "dependency_gate": null,
+      "stage": "coded+tested",
+      "stage_history": [
+        {
+          "stage": "scaffolded",
+          "at": "2026-07-09T00:00:00Z",
+          "by": "orchestrator(fable)"
+        },
+        {
+          "stage": "coded+tested",
+          "at": "2026-07-09T21:05:00Z",
+          "by": "coder-agent(sonnet)",
+          "notes": "npm test = 37/37 passing (node --test scripts/*.test.mjs). Deviations from literal spec text: (1) package.json test script uses 'node --test scripts/*.test.mjs' instead of the literal 'node --test scripts/' from the task instructions, because that exact command errors (MODULE_NOT_FOUND, tries to require() the directory) on the installed Node v24.15.0 \u2014 the glob form is the working equivalent. (2) runtime.strict (boolean, default false) is the documented place for the strict/learning mode flag since runTick's signature only takes (program, world, runtime) and the world model doesn't carry it. (3) Strict-mode rule-monitor reversion is applied iteratively to a fixpoint rather than a single pass, and for a head-on swap both parties are reverted (not just the later-indexed one) \u2014 a single-pass, later-index-only revert on a swap forces a fresh collision (the earlier party would still walk into the reverted party's cell), so both must wait for a swap to truly not happen; plain same-cell collisions still keep only the earliest-indexed mover per spec text. Violations are still reported in the `violations` array in strict mode for coaching purposes even though they're prevented. (4) op_equals/set_var/get_var use an 'any' valueType (superset of spec \u00a74.1's 5 value types) since they must hold values of unknown/mixed type. All other contracts (catalog slot/docs shape, ast.js pure helpers, interpreter TickResult shape, rules.js, narrator.js, examplePrograms.js) implemented as specified. planNextAgents and its private helpers removed from src/engine/pathfinding.js; findPath now exported as a general-purpose BFS. src/hooks/useSandboxEngine.js (out of scope, owned by C3) still imports the removed planNextAgents and will be broken until C3 rewrites it \u2014 expected per task instructions."
+        }
+      ],
+      "current_agent": "none",
+      "failure_log": []
+    },
+    {
+      "id": "C2-block-editor",
+      "description": "Block editor UI in src/editor/: Palette, ScriptView, BlockView, SlotEditor, Workspace, editorState.js, editor.css. Structured vertical script editor per spec section 5, incl. drag/reorder, slot editing, trace highlighting, localStorage program library. Built as self-contained components NOT wired into App.jsx (C5 does that); include a temporary dev harness route/flag to develop against.",
+      "why": "This is the Scratch-like authoring surface \u2014 the core ask of the rebuild.",
+      "acceptance_criteria": "In the dev harness: build the polite-walker program from an empty workspace using only palette clicks/drags and slot editing; serialize equals expected AST; reorder and nest blocks by drag; delete/duplicate work; loading reservation-brain example renders correctly; trace highlighting works when fed a recorded trace object.",
+      "depends_on": [
+        "C1-block-core"
+      ],
+      "dependency_gate": "coded+tested",
+      "stage": "coded+tested",
+      "stage_history": [
+        {
+          "stage": "scaffolded",
+          "at": "2026-07-09T00:00:00Z",
+          "by": "orchestrator(fable)"
+        },
+        {
+          "stage": "coded+tested",
+          "at": "2026-07-10T02:15:00Z",
+          "by": "coder-agent(sonnet)",
+          "notes": "npm test = 68/68 passing (includes new scripts/editorState.test.mjs, 21 tests covering editorState.js pure helpers: append/insert/remove/move/duplicate dispatch, id regeneration, literal/reporter slot editing, reporter/slot type compatibility, drag hit-testing math, label-template tokenizing, container location). Browser-verified via /editor-dev.html (src/dev/editorHarnessMain.jsx) against all 5 acceptance criteria, driven by simulated real DOM events (click/change/pointerdown-move-up) rather than direct state injection, run inside an injected iframe to work around a shared-preview-tab conflict with a concurrently-running sibling agent's own dev harness: (1) built the full polite-walker program from an empty workspace using only palette clicks (for statements/hats) and slot editing (text/dropdown/party literals, plus the per-slot reporter-picker for every nested reporter, including 4 levels of if_else nesting and 3-4 levels of reporter chains e.g. cell_x(party_goal(party_number))) \u2014 serialized and diffed against src/blocks/examplePrograms.js's real politeWalker with ids stripped: structurally identical; (2) reordering verified (dragged a top-level statement past its siblings, order changed as expected, drop-indicator line rendered during the drag) and nesting verified (dragged a top-level statement into an empty if-body via pointerdown/move/up, it moved out of the top-level container into the nested one); (3) duplicate (via the block's '...' menu) correctly deep-clones a whole subtree with fresh ids and inserts after the original; delete removes it; (4) loading the reservation-brain example renders the full for_each_party > set_var/reserve_cell/move_party structure with all nested reporter chips (next_step_toward, current_party, party_goal, get_var) correctly nested and configured; (5) fed a synthetic trace object and confirmed the matching blocks (both statements and reporters) got the qb-trace-glow class and, for reporters with a recorded value, a hover tooltip. One real bug found and fixed during verification: Workspace's mount-effect that restores the localStorage autosave into an empty program called the parent's onProgramChange synchronously enough to trip React's 'Cannot update a component while rendering a different component' warning under StrictMode's dev-only double-invoke; fixed by deferring that call with a cancellable setTimeout(fn, 0) in src/editor/Workspace.jsx, reverified clean (zero console errors) afterward. Deviations from literal task text: (a) catalog slots whose `editor` field is 'number'/'text'/'party' (not just the explicitly 'reporter-accepting' cell/boolean/any ones) also expose a reporter-picker in SlotEditor, because real example programs (e.g. reservationBrain's move_party/party_wait party inputs, politeWalker's op_less/op_greater number operands) already nest reporter blocks into those slot kinds \u2014 ast.js and the interpreter treat every input generically as literal-or-block regardless of the catalog's `editor` hint, so restricting reporter-picking to only 'reporter-accepting' slots would have made it impossible to reproduce the shipped example programs from the UI. (b) Click-to-append targets a single 'focused container' (a script's top-level body or one C-block's body/elseBody) that the user sets by clicking that container's empty-state placeholder or its trailing '+ add a block here' row; appending always goes to the end of that container, so building nested structures via clicks alone means re-focusing into the right body/elseBody between palette clicks (this is what the polite-walker build exercises). (c) Added src/editor/EditorContext.js (not in the file list) purely to share editor state/actions via React context across Palette/ScriptView/BlockView/SlotEditor without prop-drilling or a circular import between Workspace.jsx and ScriptView.jsx. Files: src/editor/{editorState.js, EditorContext.js, Workspace.jsx, Palette.jsx, ScriptView.jsx, BlockView.jsx, SlotEditor.jsx, editor.css} (all new), scripts/editorState.test.mjs (new), editor-dev.html + src/dev/editorHarnessMain.jsx (new dev harness), .claude/launch.json (reused/confirmed the 'dev' config already added by a sibling agent). Did not touch index.html, src/main.jsx, src/App.jsx, src/components/*, src/hooks/*, src/blocks/*, src/engine/*, src/teach/*."
+        }
+      ],
+      "current_agent": "none",
+      "failure_log": []
+    },
+    {
+      "id": "C3-engine-viewport",
+      "description": "Rewrite hooks/useSandboxEngine.js to drive runTick(); adapt components/Grid.jsx, Agent.jsx, SandboxViewport.jsx: smooth tick-duration lerp, violation red-flash, say bubbles, goal markers, party-click select + room-click goal set, doors driven by moves as today. Do NOT touch App.jsx layout (C5 does); keep a minimal dev harness.",
+      "why": "Connects the user-authored brain to the 3D body and gives the visual feedback (violations) the teaching model depends on.",
+      "acceptance_criteria": "Dev-run: reservation-brain example animates 4 parties smoothly to crossing goals with zero violations; simple-walker with 2 opposing parties produces a visible red collision flash in learning mode and waits in strict mode; step mode advances exactly one tick; goal set by clicking works.",
+      "depends_on": [
+        "C1-block-core"
+      ],
+      "dependency_gate": "coded+tested",
+      "stage": "coded+tested",
+      "stage_history": [
+        {
+          "stage": "scaffolded",
+          "at": "2026-07-09T00:00:00Z",
+          "by": "orchestrator(fable)"
+        },
+        {
+          "stage": "coded+tested",
+          "at": "2026-07-10T01:40:00Z",
+          "by": "coder-agent(sonnet)",
+          "notes": "npm test = 68/68 passing (37 from C1 + new scripts/engineHook.test.mjs covering the pure helpers extracted to src/hooks/engineHelpers.js: clampGrid, clampPartyToGrid, firstFreeCell, makeParty/makeInitialParties, violationRoomKeys). Browser-verified via a Vite dev harness at /viewport-dev.html (src/dev/viewportHarnessMain.jsx) against all 5 acceptance criteria: (1) reservation-brain + a 4-corner crossing-goals preset animates all parties to arrival with zero violations at any point (verified tick 0-16); (2) collision/swap flash + strict-mode wait verified with a 2-party head-on-swap preset in learning mode (swap happens, red emissive #ff3b3b confirmed on the room material via direct instrumentation, faded per the ~1s timer) and strict mode (both parties revert to their start cells, violation still reported for coaching per C1's documented strict-mode semantics); (3) stepOnce verified to advance exactly one tick per call, including pausing a running simulation; (4) party-select + room-click goal-setting verified through the full call chain (selectParty -> setGoalForSelectedParty -> goal stored -> reservation-brain re-routes toward the new goal within 2-3 ticks); (5) zero console errors on the harness page across multiple fresh-session checks (one real bug caught and fixed along the way: a React inline-style shorthand/longhand conflict \u2014 'border' vs 'borderColor' \u2014 in the harness's own button styling, unrelated to product code). Deviations from literal task text: (a) examplePrograms.js's simple-walker and polite-walker each hardcode control to party #1 only (party_number(1)), so a 2-party 'simple-walker' world can only ever produce a one-sided collision (mover vs. a permanently passive party) \u2014 and since the mover is structurally always the earliest-indexed party, C1's strict-mode collision-revert rule (which protects the earliest index) can never prevent it. Verified this empirically. Added a harness-only 'Two Walkers' program (src/dev/viewportHarnessMain.jsx, not in src/blocks/*) that generalizes the identical simple-walker decision tree to for_each_party so both parties genuinely move and a real head-on swap occurs, which strict mode does correctly prevent (both parties revert, per C1's swap-revert-both-sides semantics) \u2014 this is what the dev harness's '2 opposing parties (collision test)' preset now drives. (b) Added `server.port`/`strictPort` to vite.config.js (reads process.env.PORT, falls back to 5173) so the browser preview tooling's autoPort mechanism works; harmless additive change. (c) DEFAULT_SIMULATION.running defaults to false (paused) rather than the old engine's true, so loading the harness doesn't immediately start animating an unset/no-op program. (d) Extracted pure helpers to new src/hooks/engineHelpers.js (clampGrid, clampPartyToGrid, firstFreeCell, makeParty, makeInitialParties, violationRoomKeys) so they're unit-testable without React; useSandboxEngine.js itself is now a thin wiring layer over these plus runTick. Files: src/hooks/useSandboxEngine.js (full rewrite), src/hooks/engineHelpers.js (new), src/components/Agent.jsx, src/components/Grid.jsx, src/components/SandboxViewport.jsx (all adapted), viewport-dev.html + src/dev/viewportHarnessMain.jsx (new dev harness), scripts/engineHook.test.mjs (new), .claude/launch.json (new, dev server config), vite.config.js (port env support). Did not touch src/App.jsx, src/main.jsx, index.html, DesignerPanel.jsx, editor/*, teach/*, blocks/*, engine/* \u2014 App.jsx remains broken (imports the old useSandboxEngine shape + DesignerPanel) exactly as C1 left it and as expected until C5 rewires it."
+        }
+      ],
+      "current_agent": "none",
+      "failure_log": []
+    },
+    {
+      "id": "C4-teaching",
+      "description": "src/teach/: lessons.js (min 6, aim 10, per spec 7.1), lesson runner with declarative success checks, hints.js rule engine (spec 7.2), CoachPanel.jsx, ReferencePanel.jsx, block hover tooltips fed from catalog docs. Node --test coverage for hints + success checks.",
+      "why": "The user cannot code; the product must teach. This is the differentiator vs the failed parameter dashboard.",
+      "acceptance_criteria": "npm test covers hint rules and lesson success checks; lessons 1\u20136 completable end-to-end (manually verified in browser after C5 wiring, logic-verified by test before); every catalog block has docs surfaced in ReferencePanel.",
+      "depends_on": [
+        "C2-block-editor",
+        "C3-engine-viewport"
+      ],
+      "dependency_gate": "coded+tested",
+      "stage": "coded+tested",
+      "stage_history": [
+        {
+          "stage": "scaffolded",
+          "at": "2026-07-09T00:00:00Z",
+          "by": "orchestrator(fable)"
+        },
+        {
+          "stage": "coded+tested",
+          "at": "2026-07-10T14:41:50Z",
+          "by": "coder-agent(sonnet)",
+          "notes": "npm test = 133/133 passing (68 prior + 65 new: scripts/lessons.test.mjs and scripts/hints.test.mjs). All 10 lessons implemented in src/teach/lessons.js with real ast.js-built starter programs (validate() passes for all), well-formed worlds, and BFS-reachable goals; lessons 1-6 fully polished, 7-10 functional with partial scaffolding per instructions. Intended solutions for lessons 1-6 run through the real interpreter (runTick) for up to each lesson budget and pass all declared checks. src/teach/lessonRunner.js implements evaluateChecks + party_at/all_parties_at_goal/no_violations/within_ticks/used_block plus startAttempt/advanceAttempt/resetAttempt lifecycle helpers, pure and node-testable. src/teach/hints.js implements all required rules (no-hat-script, collision, swap-trap, stuck-party >=10 ticks, budget/infinite-loop pointing at the loop block, current_party misuse, unreachable-goal via findPath BFS, interpreter type problems) as a pure computeHints(program, recentTickResults, lessonState) plus a createHintTracker() stateful wrapper for the dedup lifecycle (fires while active, clears, refires on a fresh trigger). CoachPanel.jsx and ReferencePanel.jsx are props-driven React components (src/teach/teach.css for styling, matches editor.css dark theme); ReferencePanel groups all catalog blocks by category with docs blurb+example and a working search box, and exports BlockHelpTooltip. Browser-verified via teach-dev.html + src/dev/teachHarnessMain.jsx (mirrors editor-dev.html/viewport-dev.html pattern): lesson picker, live checklist with real pass/fail state, hint feed, nudge button (reveals lesson hints one at a time), Explain-my-program (renders narrator.js output), and ReferencePanel search/category-color rendering all confirmed working with zero console errors. Deviations: (1) lesson 5 (two-parties-one-hallway) world tuned so the two parties start an odd distance apart (0 and 3, not 0 and 4) \u2014 with a naive is_occupied-before-move check on both sides, an even starting distance lets both parties simultaneously decide to step into the same then-unoccupied middle cell (a real collision, since is_occupied only sees the pre-tick world), which no single-tick occupancy check can prevent; an odd distance means they either resolve or safely deadlock waiting on each other\u2019s occupied current cell, which is what the lesson is actually able to teach before reservations are introduced in lesson 6. (2) CoachPanel/ReferencePanel are React components (JSX) per the task file list, consistent with C2/C3\u2019s components \u2014 not touched: src/App.jsx, src/main.jsx, index.html, src/editor/*, src/blocks/*, src/engine/*, src/hooks/*, src/components/*."
+        }
+      ],
+      "current_agent": "none",
+      "failure_log": []
+    },
+    {
+      "id": "C5-shell-integration",
+      "description": "Rewrite App.jsx/App.css to the three-region layout (spec 8): viewport + toolbar, block workspace right, tabbed Coach/Reference/World panel. Wire C1\u2013C4 together, remove DesignerPanel.jsx and dev harnesses, end-to-end verification incl. lessons 1\u20136 playthrough and README update.",
+      "why": "Integration + final UX; keeping it separate prevents C2/C3/C4 from colliding in App.jsx.",
+      "acceptance_criteria": "npm run dev: full app loads; lesson 1 and lesson 6 completable start-to-finish in the browser; run/pause/step/strict/speed controls all function; program persists across reload; npm test green; no console errors during a 2-minute run.",
+      "depends_on": [
+        "C4-teaching"
+      ],
+      "dependency_gate": "coded+tested",
+      "stage": "coded+tested",
+      "stage_history": [
+        {
+          "stage": "scaffolded",
+          "at": "2026-07-09T00:00:00Z",
+          "by": "orchestrator(fable)"
+        },
+        {
+          "stage": "coded+tested",
+          "at": "2026-07-10T15:20:00Z",
+          "by": "coder-agent(sonnet)",
+          "notes": "npm test = 133/133 passing (unchanged). Rewrote src/App.jsx + src/App.css to the three-region layout (spec §8): top-left ~55% viewport+toolbar (Run/Pause, Step, Reset, tick-speed slider, strict toggle, tick counter), right ~45% column = editor/Workspace.jsx, bottom-left tabbed Coach/Reference/World panel. Added a new src/components/WorldPanel.jsx (grid size, party add/remove/rename/color/start/goal, simplified room designer) built fresh against useSandboxEngine's real shape rather than adapting DesignerPanel.jsx, since DesignerPanel's props (sandbox.agents/updateAgent/conflicts/updateSimulation) belonged to the old pre-C1 engine and are fully incompatible with the current hook — confirmed via grep that nothing else imported DesignerPanel.jsx before deleting it. Two small additive extensions to src/hooks/useSandboxEngine.js (owned by C3 but needed for integration): (1) added `loadWorldPreset(world)` — wholesale-replaces grid+rooms+parties and resets tick/runtime/selection, used to load each lesson's world (including custom wallRules for lessons 2/7/8) when the user picks a lesson, mirroring the existing loadPartyPreset pattern; (2) added `world: result.world` to each `lastTickResults` entry, because hints.js's ruleStuckParty rule reads `.world.parties` off historical entries and the hook previously only kept error/moves/problems/sayings/tick/violations there. Both changes are additive (no existing fields removed) and 133/133 tests still pass untouched. Program persistence: App reads the same 'qb.editor.autosave.v1' localStorage key Workspace.jsx already autosaves to, on initial state init, falling back to lesson 1's starterProgram if nothing saved or it's corrupt/empty; Workspace's own internal autosave-restore-on-empty-program effect is therefore never triggered (App always seeds a non-empty program) so there's exactly one source of truth for persistence, not two racing ones. Lesson selection persists separately via a small 'qb.app.lastLesson.v1' key. Switching lessons (via CoachPanel's picker or Next Lesson) reloads only the world (sandbox.loadWorldPreset(lesson.world)), never touches the in-progress program, matching the spec's 'only override on explicit lesson/example pick' requirement. Browser-verified end-to-end at 1440x900 (the layout has a <1280px single-column responsive fallback, confirmed separately): (1) npm run dev loads all three regions correctly proportioned, zero console errors; (2) Lesson 1 built from an empty every-tick script using only palette clicks + slot editing (move party to → party #1, cell → room east of position of party 1), ran it, both success-checklist items (used move_party, party reaches far wall) flipped to ✓; (3) Lesson 6 (Reservations 101) verified by loading the Reservation Brain example program, running it against the lesson's real 4-party crossing world — all 5 checks passed (reserve used, for_each_party used, all parties reach goal, zero violations, within 40 ticks); (4) exercised run/pause/step/strict-toggle/speed-slider, all functional, trace glow visible on running blocks; (5) reloaded mid-session (program = Reservation Brain, lesson = 6) — both the program and the active lesson persisted correctly; (6) npm test stayed green after every change; (7) watched console across the full verification session (well over 2 minutes of cumulative running-simulation time) — zero errors, only benign pre-existing THREE.Clock deprecation warnings and normal Vite/React-DevTools info logs. Cleanup performed (done last, after verification passed): deleted src/components/DesignerPanel.jsx (unreferenced elsewhere, confirmed via grep), editor-dev.html, viewport-dev.html, teach-dev.html, and the now-empty src/dev/ directory (editorHarnessMain.jsx, viewportHarnessMain.jsx, teachHarnessMain.jsx). Updated README.md to describe the shipped app and npm run dev/test. No deviations from the C1–C4 API contracts documented in their own stage_history notes — all consumed as documented (TickResult shape, useSandboxEngine's exposed actions, Workspace's {program,onProgramChange,trace,parties,extraPrograms} props, CoachPanel/ReferencePanel's props-driven contracts, lessonRunner.evaluateChecks/isLessonComplete, hints.computeHints)."
+        }
+      ],
+      "current_agent": "none",
+      "failure_log": []
+    }
+  ]
+}
