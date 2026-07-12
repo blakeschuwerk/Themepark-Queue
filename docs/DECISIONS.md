@@ -527,3 +527,16 @@ button — scope to lessons with a test‑proven solved form, extend on request)
 "restore my code" snapshot just for this button (a real history stack is more useful and was
 already wanted); a confirm dialog before loading the solution (Undo makes it non‑destructive, so
 a modal is friction the beginner doesn't need).
+
+---
+
+## Public repository
+
+The complete source code, lessons, design docs, and test suite are now published at
+**https://github.com/blakeschuwerk/Themepark-Queue** under the initial commit. The build includes:
+- 20 lessons with verified solutions for lessons 16–20
+- 85 block types across SENSING/MOTION/CONTROL/BUILD/VARIABLES/OPERATORS categories
+- 214 passing unit tests (blocks, AST, editor state, interpreter, lessons, hints, narrator)
+- Full `.claude/` project configuration (launch.json for the Vite dev server)
+- Design documentation: BLOCKS_SPEC.md (language design), TIMELINE.md (build log),
+  DECISIONS.md (rationale for key choices)

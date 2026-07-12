@@ -376,3 +376,7 @@ is, the corners are, what the room helpers are").
   `npm test` 214/214; `npm run lint` clean; browser play‑test confirmed the button swaps in the
   solution and Undo/Redo round‑trips it back and forth with correct enabled/disabled states and no
   console errors.
+- **Public repository:** initial commit pushed to **https://github.com/blakeschuwerk/Themepark-Queue**.
+  Project is now in version control with full source, 20 lessons, 85 block types, 214 tests, and
+  design documentation. `.claude/launch.json` configured for `npm run dev` preview (Vite on port
+  5173, autoPort enabled).
